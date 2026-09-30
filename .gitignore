@@ -1,0 +1,13 @@
+# Virtual environment
+.venv/
+
+# Personal conversation history
+conversation.txt
+
+# Python-generated cache files
+__pycache__/
+*.pyc
+
+# Local environment variables and secrets
+.env
+.env.*
