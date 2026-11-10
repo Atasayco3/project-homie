@@ -1,7 +1,10 @@
 import speech_recognition as sr
 from datetime import datetime
 import pyttsx3
+from openai import OpenAI
 
+
+client = OpenAI()
 
 def listen():
     recognizer = sr.Recognizer()
@@ -97,10 +100,31 @@ def respond_to_message(message):
 #         return "I'm not sure how to respond to that.", False
 # 
 
+def should_shutdown(message):
+    shutdown_phrases = [
+        "goodbye homie",
+        "goodbye hom",
+        "shut down homie",
+        "stop listening homie"
+    ]
+
+    message = message.lower()
+
+    return any(phrase in message for phrase in shutdown_phrases)
+
 def speak(text):
     engine = pyttsx3.init()
     engine.say(text)
     engine.runAndWait()
+
+
+def ask_ai(message):
+    response = client.responses.create(
+        model="gpt-5.6-luna",
+        input=message
+    )
+
+    return response.output_text
 
 def main():
     print("Homie is online.")
@@ -110,21 +134,22 @@ def main():
 
         if message:
             save_message("User", message)
-            response, should_exit = respond_to_message(message)
+
+            if should_shutdown(message):
+                response = "Goodbye! Have a great day!"
+                should_exit = True
+            else:
+                response = ask_ai(message)
+                should_exit = False
 
             save_message("Homie", response)
-            
+
             print(f"Homie: {response}")
-            print("Saved to conversation.txt")
-            
             speak(response)
-            
+
             if should_exit:
                 print("See ya!")
                 break
-        else:
-            print("No message to save.")
-
 
 if __name__ == "__main__":
     main()
